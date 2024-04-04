@@ -1,0 +1,25 @@
+
+version: '3'
+
+services:
+
+  # app:
+  #   build:
+  #     context: . # Use an image built from the specified dockerfile in the current directory.
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3001:3001"  
+  #   restart: unless-stopped
+  #   networks:  
+  #     - backend
+  
+  redis:
+    image: "redis:alpine"
+    restart: unless-stopped
+    ports: 
+      - "6377:6379"
+    networks:
+      - backend
+
+networks:
+  backend:    
