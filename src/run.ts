@@ -7,28 +7,22 @@ import { ApolloServer } from '@apollo/server'
 import { expressMiddleware } from '@apollo/server/express4'
 import writeLogger from './middleware/logger';
 import { resolvers } from './data/resolver.graphql';
+import redis from './config/redis'
+
 // import router from './router/index'
 import Router from './router/index';
 dotenv.config();
 
-// auth:[Article]
-type ArticleResponse = {
-    id: String
-    title: String
-    slug: String
-    description: String
-    createdAt: String
-    updatedAt: String
-}
-
 async function startApolloServer(resolvers: any) {
-    const serverGraphQL = new ApolloServer({
-        typeDefs: gql`
+    try {
+
+        const serverGraphQL = new ApolloServer({
+            typeDefs: gql`
         type Query {
           hello: String
           test: String
           show: String
-          Auth: String
+          Auth: ArticleResponse!
         }
         type AuthResponse{
             username:String
@@ -37,29 +31,46 @@ async function startApolloServer(resolvers: any) {
         type Auth{
             Auth:AuthResponse
         }
+        type Authors{
+            username:String!
+            id:String!
+        }
         type ArticleResponse{
-            id: String!
+            authors:Authors
+            articles:[Article]
+        }
+        type Article{
+            _id: String!
             title: String!
             slug:String!
+            authors:String!
             description:String!
             createdAt: String!
             updatedAt: String!
         }
 
-        type Mutations{
-            Auth:String
-        },
       `,
-        resolvers: resolvers,
-        csrfPrevention: true,
-        cache: 'bounded',
-    });
-    return serverGraphQL;
+            resolvers: resolvers,
+            csrfPrevention: true,
+            cache: 'bounded',
+        });
+        return serverGraphQL;
+
+    } catch (error) {
+        console.log('errorgraph:', error)
+        throw error;
+    }
 }
 
 async function run() {
     const PORT = process.env.PORT || 3001;
 
+    await redis.connect();
+
+    redis.on("error", (error: Error) => {
+        console.error(`Redis client error:`, error);
+    });
+    
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     app.use(cors());
@@ -82,10 +93,6 @@ async function run() {
         context: async ({ req }) => ({
             token: req.headers.authorization,
             contextValue: req,
-            // AuthResponse: {}
-            // dataSources: {
-            //   userApi: new UserAPI(),
-            // },
         }),
 
     }));

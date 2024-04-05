@@ -124,7 +124,7 @@ const getArticleGraphQL = async (request: string) => {
       },
       {},
       {
-        sort: { createdAt: -1 },
+        sort: { createdAt: -1 }, 
       }
     );
 
@@ -134,9 +134,11 @@ const getArticleGraphQL = async (request: string) => {
     };
 
     try {
-      // return result;
+      // return data[0];
+      // return data;
+      return result;
 
-      return isExist;
+      // return isExist;
     } catch (error) {
       throw error;
     }

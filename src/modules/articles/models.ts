@@ -26,7 +26,9 @@ const dataSchema = new Schema(
       type: Date,
       default: Date.now
     },
-  },
+  }, {
+  // versionKey: false
+}
   // { timestamps: true }
 );
 dataSchema.set("toJSON", { getters: true });
